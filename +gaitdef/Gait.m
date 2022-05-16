@@ -30,6 +30,8 @@ classdef Gait < handle
       
       
       % Gait information
+      gait_name;           % character (i.e., A, B, etc) name for the gait
+      
       robo_states;         % gait sequence
                            
       primitive_labels;    % sequence of robot motion primitive labels, 
@@ -70,7 +72,7 @@ classdef Gait < handle
           if nargin < 2
               params = [];
           end
-          
+          this.set_property(params, 'gait_name', 'undefined');  
           this.set_property(params, 'robot_name', 'undefined');             
           this.set_property(params, 'transition_time', .45);  % s    
           this.set_property(params, 'substrate', 'mat');  % s         
@@ -98,7 +100,7 @@ classdef Gait < handle
           for i = 1:this.len_gait
               this.twists(:, i) = this.delta_pose_2_twist(this.delta_poses(:, i), this.transition_time);
           end
-          this.Twist = this.delta_pose_2_twist(this.Delta_Pose, this.transition_time);
+          this.Twist = this.delta_pose_2_twist(this.Delta_Pose, this.transition_time*(this.len_gait));
           
         end
     
@@ -201,7 +203,12 @@ classdef Gait < handle
         % Calculate the average body twist for each motion primitive or
         % gait.
         function twist = delta_pose_2_twist(delta_pose, delta_time)
-             twist = 1/delta_time*delta_pose;
+             delta_pose_mat = [ cos(delta_pose(3)), -sin(delta_pose(3)), delta_pose(1) ; ...
+                                sin(delta_pose(3)), cos(delta_pose(3)), delta_pose(2) ; ...
+                                0, 0, 1 ];
+             twist_mat = logm(delta_pose_mat)/delta_time;
+             twist = [ twist_mat(1, 3), twist_mat(2, 3), twist_mat(2, 1) ];
+%             twist = 1/delta_time*delta_pose;
          end
     end
 
