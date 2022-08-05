@@ -71,7 +71,7 @@ function tracking_data = videotracker(videoObject,...
 
 % Setup other parameters
 numberOfFrames = videoObject.NumberOfFrame;
-keyboard
+
 figure(1)
 for k = start_frame : numberOfFrames   
 tic
@@ -82,11 +82,24 @@ tic
     end
     
         thisFrame = read(videoObject,k);
-        thisFrame = imcrop(thisFrame,[0,0,630,400]);
-        newim = createMaskfixedblue3(thisFrame);
+%         if k == start_frame
+%             thisFrame = imcrop(thisFrame,[90,120,640,320]);
+%         else
+%             thisFrame = imcrop(thisFrame,[90,120,640,320]);
+%         end
+%         newim = createMaskfixedblue3(thisFrame);
+%         newim = createMaskCarpetBlue(thisFrame);
+%           newim = createMaskhdblue(thisFrame);
+%         newim = createMasktemp(thisFrame);
 %         newim = createMaskpink2(thisFrame);
-%         newim = createMaskpink4(thisFrame);
-        newim = bwareaopen(newim,2);
+        newim = createMaskpink4(thisFrame);
+%         newim = createMaskHarishPink(thisFrame);
+
+        if k == start_frame
+            newim = bwareaopen(newim,20);
+        else
+            newim = bwareaopen(newim,10);
+        end
         newim = imfill(newim, 'holes');
         axis on;
         
@@ -98,10 +111,11 @@ tic
                  for rb = 1:numberOfRegions
                      count = count + 1;
                      cent(count,:) = stats(rb).Centroid;
+                     cent(count,2) = 1080 - cent(count,2) ;  % Correction for y-axis.
                  end
         zc = zeros(size(cent,1),1);
         cent = [cent,zc];
-                 
+        
         if k == start_frame
             P0 = cent;
             PrevPt = cent;
@@ -122,7 +136,7 @@ tic
               d(j) = pdist(X,'euclidean');
           end
               [dmin,ind] = min(d);  
-              if(dmin < 12)
+              if(dmin < 15)
               resrvd(i,:) = cent(ind,:);
               end
       end
@@ -137,7 +151,7 @@ tic
               d(j) = pdist(X,'euclidean');
           end
                 [dmin,ind] = min(d);
-                if(dmin < 12)
+                if(dmin < 15)
                    resrvd(ind,:) = cent(i,:);
                 end
       end
@@ -180,20 +194,21 @@ clear d;
 end
 if ifplot
     % Plotting the points
-%     imshow(thisFrame)
+    imshow(thisFrame)
 %     set(gcf, 'Position',  [100, 100, 750, 400])
-    set(gca,'XLim',[0 700],'YLim',[0 700]);
+    set(gcf, 'Position',  [100, 100, 1000, 1000])
+%     set(gca,'XLim',[0 700],'YLim',[0 700]);
     hold on
-    % plot(PrevPt(:,1),PrevPt(:,2),'g*','LineWidth',0.5,'MarkerSize',2)
-    mean_centroid = mean(PrevPt);
+    plot(PrevPt(:,1),PrevPt(:,2),'g*','LineWidth',0.5,'MarkerSize',2)
+%     mean_centroid = mean(PrevPt);
     % plot([PrevPt(1,1) PrevPt(2,1)], [PrevPt(1,2) PrevPt(2,2)],'LineWidth',1.5)
     % h = animatedline('LineStyle','-','Color','b','LineWidth',1.5);
     caption = sprintf('%d blobs found in frame #%d 0f %d', count, k, numberOfFrames);
     title(caption, 'FontSize', 20);
-    h = animatedline('Marker','o','Color','b','MarkerSize',1,'MarkerFaceColor','b');
-    h2 = animatedline('LineStyle','-','Color','r','LineWidth',1.5);
-    addpoints(h,mean_centroid(1,1),mean_centroid(1,2))
-    drawnow;
+%     h = animatedline('Marker','o','Color','b','MarkerSize',1,'MarkerFaceColor','b');
+%     h2 = animatedline('LineStyle','-','Color','r','LineWidth',1.5);
+%     addpoints(h,mean_centroid(1,1),mean_centroid(1,2))
+%     drawnow;
     axis on
     hold off
 end
