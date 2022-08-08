@@ -1,4 +1,49 @@
-
+% offlinetracker v1.0
+% 
+% This function inputs a video file of a soft robot with markers to
+% outputs the tracked robot pose and the tracked video file
+% 
+% tracking_data = offlinetracker(inputfilename, outputfilename, options)
+% 
+% Inputs:
+% 1. inputfilename: The name the input video file. The video lighting
+% ensures that the robot and the markers are clearly visible [Format: mp4]
+% 2. outputfilename: The name of the output video file with the over-laid
+% markers and the frame number [Format: mp4]
+% 3. options:
+%   a. startframe - the frame number from which the tracking starts [1x1]
+%   b. number_of_markers - the number of markers on the robot [1x1]
+%   c. ifplot - flag for visualizing while data is being processed (debug
+%   mode) [0 or 1]
+% 
+% Output:
+% 1. tracking_data: tracked data matrix of dimension 
+%    [3x(number_of_markers) + 
+%     Intermediate frame {Rotation matrix (9) + displacement (3)}
+%     Global frame {Rotation matrix (9) + displacement (3)} + time]
+%  2. Tracked video file with overlaid tracked markers of name
+%  outputfilename
+% 
+% Example:
+% options.startframe =1;
+% options.number_of_markers = 4;
+% options.ifplot = false;
+% tracking_data = offlinetracker('Gait_B_120', 'Gait_B_120_tracked', options)
+% tracking_data will be of dimension Nx(3*4 + 2*(9 + 3) + 1)=Nx37 where N is
+% the number of frames
+% 
+% % =====
+% TODO: 
+% 1. Convert this to a class with functions processFile(), plotData(),
+% 2. Tracking data is in SE(2), hence, everything is much simpler - 2x1 for
+% marker positions, 1x1 theta for rotation, 2x1 for displacements. SO2 and
+% SE3 maps can map them to rotation and translation matrix. Even pose can
+% be constructed out of this.
+% 3. Add endframe in options if it is not desired to track the whole video.
+% Default should be end of the video.
+% % =====
+% 
+% Author: Arun Niddish Mahendran (anmahendran@crimson.ua.edu)
 function tracking_data = offlinetracker(inputfilename, outputfilename, options)
 if nargin>2
     startframe = options.startframe;
